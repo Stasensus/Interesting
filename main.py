@@ -17,13 +17,17 @@ temp_words_list = []
 
 
 class Time:
-    def time_start(self):
-        self.time_starts = time.perf_counter()
+    def time_start(self, message):
+        chat_id = message.chat.id
+        users[chat_id] = {'time_starts': time.perf_counter()}
+        #self.time_starts = time.perf_counter()
 
     def time_check(self, message):
         chat_id = message.chat.id
-        self.time_current = time.perf_counter()
-        if self.time_current - self.time_starts < users[chat_id]['explain_time']:
+        users[chat_id] = {'time_current': time.perf_counter()}
+        #self.time_current = time.perf_counter()
+        #if self.time_current - self.time_starts < users[chat_id]['explain_time']:
+        if users[chat_id]['time_current'] - users[chat_id]['time_starts'] < users[chat_id]['explain_time']:
             return True
         else:
             return False
@@ -115,7 +119,7 @@ def set_command_amount(message):
 def command_name(message):
     chat_id = message.chat.id
     if users.get(chat_id):
-        if len(users.get(chat_id)['command_name']) != users.get(chat_id)['command_amount']:              #command_amount : 2 command name : [спартак]
+        if len(users.get(chat_id)['command_name']) != users.get(chat_id)['command_amount']:
             users[chat_id]['command_name'].append(message.text)
             if len(users.get(chat_id)['command_name']) + 1 <= users.get(chat_id)['command_amount']:
                 bot.send_message(message.chat.id,
@@ -272,7 +276,7 @@ def start_circle(message):
 
 def start_explanation(message):
     Counters.temporary_score_counter = 0
-    Object_time.time_start()
+    Object_time.time_start(message)
     # temp_words_list = []    Не забыть обнулить каждый ход!
     chat_id = message.chat.id
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
