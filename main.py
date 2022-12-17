@@ -19,15 +19,16 @@ temp_words_list = []
 class Time:
     def time_start(self, message):
         chat_id = message.chat.id
-        users[chat_id] = {'time_starts': time.perf_counter()}
+        #users[chat_id] = {'time_starts': time.perf_counter()}
         #self.time_starts = time.perf_counter()
+        users[chat_id]['start time'] = time.perf_counter()
 
     def time_check(self, message):
         chat_id = message.chat.id
-        users[chat_id] = {'time_current': time.perf_counter()}
         #self.time_current = time.perf_counter()
+        users[chat_id]['current time'] = time.perf_counter()
         #if self.time_current - self.time_starts < users[chat_id]['explain_time']:
-        if users[chat_id]['time_current'] - users[chat_id]['time_starts'] < users[chat_id]['explain_time']:
+        if users[chat_id]['current time'] - users[chat_id]['start time'] < users[chat_id]['explain_time']:
             return True
         else:
             return False
