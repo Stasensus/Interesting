@@ -11,23 +11,18 @@ FILE3 = r'hard.txt'
 FILE4 = r'english.txt'
 
 users = {}
-commands_score = {}
 players = {}
-temp_words_list = []
+
 
 
 class Time:
     def time_start(self, message):
         chat_id = message.chat.id
-        #users[chat_id] = {'time_starts': time.perf_counter()}
-        #self.time_starts = time.perf_counter()
         users[chat_id]['start time'] = time.perf_counter()
 
     def time_check(self, message):
         chat_id = message.chat.id
-        #self.time_current = time.perf_counter()
         users[chat_id]['current time'] = time.perf_counter()
-        #if self.time_current - self.time_starts < users[chat_id]['explain_time']:
         if users[chat_id]['current time'] - users[chat_id]['start time'] < users[chat_id]['explain_time']:
             return True
         else:
@@ -111,7 +106,7 @@ def set_command_amount(message):
     chat_id = message.chat.id
     users[chat_id] = {
         'command_amount': int(message.text),
-        'command_name': [],
+        'command_name': {},
     }
     bot.send_message(message.chat.id, 'Введите название команды №1:')
     bot.register_next_step_handler(message, command_name)
@@ -121,15 +116,15 @@ def command_name(message):
     chat_id = message.chat.id
     if users.get(chat_id):
         if len(users.get(chat_id)['command_name']) != users.get(chat_id)['command_amount']:
-            users[chat_id]['command_name'].append(message.text)
+            users[chat_id]['command_name'][message.text] = 0
             if len(users.get(chat_id)['command_name']) + 1 <= users.get(chat_id)['command_amount']:
                 bot.send_message(message.chat.id,
                                  f"Введите название команды №{len(users.get(chat_id)['command_name']) + 1}: ")
                 bot.register_next_step_handler(message, command_name)
             else:
-                for i in users[chat_id]['command_name']:
-                    commands_score[i] = 0
-                print(commands_score)
+                #for i in users[chat_id]['command_name']:
+                #    commands_score[i] = 0
+                print(users)
                 victory_score(message)
     else:
         bot.send_message(message.chat.id, 'Ваш ответ не распознан, нажми на кнопку')
@@ -250,8 +245,14 @@ def create_game_code(message):
     code = random.randint(10000000, 999999999999)
     players[code] = [message.chat.id]
     bot.send_message(message.chat.id, f'Ваш код: {code}')
-    start_circle(message)
+    create_counters(message)
 
+def create_counters(message):
+    chat_id = message.chat.id
+    users[chat_id]['commands_counter'] = 0
+    users[chat_id]['temporary_score_counter'] = 0
+    users[chat_id]['words_counter'] = 0
+    start_circle(message)
 
 def echo(message, text):
     chat_id = message.chat.id
@@ -268,7 +269,7 @@ def start_circle(message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     button_start = types.KeyboardButton('Начать объяснение!')
     keyboard.row(button_start)
-    active_command = users[chat_id]['command_name'][Counters.commands_counter]
+    active_command = list(users[chat_id]['command_name'].keys())[users[chat_id]['commands_counter']]
     bot.send_message(message.chat.id,
                      f"Объясняет команда {active_command}", reply_markup=keyboard)
     echo(message, f"Объясняет команда {active_command}")
@@ -276,18 +277,20 @@ def start_circle(message):
 
 
 def start_explanation(message):
-    Counters.temporary_score_counter = 0
-    Object_time.time_start(message)
-    # temp_words_list = []    Не забыть обнулить каждый ход!
     chat_id = message.chat.id
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    button_next = types.KeyboardButton('Следующее слово')
-    button_skip = types.KeyboardButton('Пропустить слово')
-    keyboard.row(button_next, button_skip)
-    bot.send_message(message.chat.id,
-                     users[chat_id]['dictionary'][Counters.words_counter], reply_markup=keyboard)
-    echo(message, {users[chat_id]['dictionary'][Counters.words_counter]})
-    bot.register_next_step_handler(message, demonstrate_word)
+
+    users[chat_id]['temporary_score_counter'] = 0
+    Object_time.time_start(message)
+    users[chat_id]['temp_words_list'] = []
+
+    # keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    # button_next = types.KeyboardButton('Следующее слово')
+    # button_skip = types.KeyboardButton('Пропустить слово')
+    # keyboard.row(button_next, button_skip)
+    # bot.send_message(message.chat.id,
+    #                  users[chat_id]['dictionary'][users[chat_id]['words_counter']], reply_markup=keyboard)
+    # echo(message, {users[chat_id]['dictionary'][users[chat_id]['words_counter']]})
+    demonstrate_word(message)
 
 
 def demonstrate_word(message):
@@ -296,23 +299,26 @@ def demonstrate_word(message):
     button_next = types.KeyboardButton('Следующее слово')
     button_skip = types.KeyboardButton('Пропустить слово')
     keyboard.row(button_next, button_skip)
-    count_words()
-    if message.text.lower() == 'следующее слово':
-        Counters.temporary_score_counter += 1
-        temp_words_list.append(users[chat_id]['dictionary'][Counters.words_counter])
-        print(temp_words_list)
-
-    elif message.text.lower() == 'пропустить слово':
-        if users[chat_id]['penalty'] == True:
-            Counters.temporary_score_counter -= 1
-            if Counters.temporary_score_counter < 0:
-                Counters.temporary_score_counter = 0
-
     if Object_time.time_check(message) == True:
         bot.send_message(message.chat.id,
-                         users[chat_id]['dictionary'][Counters.words_counter], reply_markup=keyboard)
-        echo(message, users[chat_id]['dictionary'][Counters.words_counter])
+                         users[chat_id]['dictionary'][users[chat_id]['words_counter']], reply_markup=keyboard)
+        echo(message, users[chat_id]['dictionary'][users[chat_id]['words_counter']])
+
+        if message.text.lower() in ['следующее слово', 'начать объяснение!']:
+            users[chat_id]['temp_words_list'].append(users[chat_id]['dictionary'][users[chat_id]['words_counter']])
+            users[chat_id]['words_counter'] += 1
+            users[chat_id]['temporary_score_counter'] += 1
+
+
+        elif message.text.lower() == 'пропустить слово':
+            users[chat_id]['words_counter'] += 1
+            if users[chat_id]['penalty'] == True:
+                users[chat_id]['temporary_score_counter'] -= 1
+                if users[chat_id]['temporary_score_counter'] < 0:
+                    users[chat_id]['temporary_score_counter'] = 0
+        print(users[chat_id]['temp_words_list'])
         bot.register_next_step_handler(message, demonstrate_word)
+
     else:
         bot.send_message(message.chat.id,
                          'Время истекло!')
@@ -321,12 +327,13 @@ def demonstrate_word(message):
 
 
 def finish_explanation(message):
+    chat_id = message.chat.id
     bot.send_message(message.chat.id,
                      'Были объяснены слова:')
     echo(message, 'Были объяснены слова:')
     bot.send_message(message.chat.id,
-                     '\n'.join(temp_words_list))
-    echo(message, '\n'.join(temp_words_list))
+                     '\n'.join(users[chat_id]['temp_words_list']))
+    echo(message, '\n'.join(users[chat_id]['temp_words_list']))
     bot.send_message(message.chat.id,
                      'Сколько слов объяснено неправильно? Напишите цифру. Если все правильно, введите "0"')
     echo(message, 'Сколько слов объяснено неправильно? Напишите цифру. Если все правильно, введите "0"')
@@ -334,8 +341,9 @@ def finish_explanation(message):
 
 
 def finish_explanation_2(message):
+    chat_id = message.chat.id
     if message.text.isdigit():
-        Counters.temporary_score_counter -= int(message.text)
+        users[chat_id]['temporary_score_counter'] -= int(message.text)
         finish_explanation_3(message)
     else:
         bot.send_message(message.chat.id, 'Вы ввели не число. Введите число')
@@ -345,14 +353,14 @@ def finish_explanation_2(message):
 
 def finish_explanation_3(message):
     chat_id = message.chat.id
-    print(commands_score)
-    if Counters.temporary_score_counter < 0:
-        Counters.temporary_score_counter = 0
-    active_command = users[chat_id]['command_name'][Counters.commands_counter]
-    commands_score[active_command] += Counters.temporary_score_counter
+    if users[chat_id]['temporary_score_counter'] < 0:
+        users[chat_id]['temporary_score_counter'] = 0
+    active_command = list(users[chat_id]['command_name'].keys())[users[chat_id]['commands_counter']]
+    users[chat_id]['command_name'][active_command] += users[chat_id]['temporary_score_counter']
+    n = users[chat_id]['temporary_score_counter']
     bot.send_message(message.chat.id,
-                     f'Ваша команда набрала {Counters.temporary_score_counter} очков')
-    echo(message, f'Ваша команда набрала {Counters.temporary_score_counter} очков')
+                     f'Ваша команда набрала {n} очков')
+    echo(message, f'Ваша команда набрала {n} очков')
     finish_explanation_4(message)
 
 def finish_explanation_4(message):
@@ -360,29 +368,29 @@ def finish_explanation_4(message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     button_start = types.KeyboardButton('Начать объяснение!')
     keyboard.row(button_start)
-    if Counters.commands_counter + 1 < users.get(chat_id)['command_amount']:
-        Counters.commands_counter += 1
-        active_command = users[chat_id]['command_name'][Counters.commands_counter]
+    if users[chat_id]['commands_counter'] + 1 < users.get(chat_id)['command_amount']:
+        users[chat_id]['commands_counter'] += 1
+        active_command = list(users[chat_id]['command_name'].keys())[users[chat_id]['commands_counter']]
         bot.send_message(message.chat.id,
                          f"Объясняет команда {active_command}", reply_markup=keyboard)
         echo(message, f"Объясняет команда {active_command}")
-        start_explanation(message)
+        bot.register_next_step_handler(message, start_explanation)
     else:
         finish_circle(message)
 
 
 def finish_circle(message):
     chat_id = message.chat.id
-    for i in commands_score:
+    for i, j in list(users[chat_id]['command_name'].items()):
         bot.send_message(message.chat.id,
-                         f'Команда {i} набрала {commands_score[i]} очков')
-        echo(message, f'Команда {i} набрала {commands_score[i]} очков')
-    for i in users[chat_id]['command_name']:
-        if commands_score[i] >= users[chat_id]['score']:
+                         f'Команда {i} набрала {j} очков')
+        echo(message, f'Команда {i} набрала {j} очков')
+    for i in list(users[chat_id]['command_name'].values()):
+        if i >= users[chat_id]['score']:
             congratulate(message)
             break
     else:
-        Counters.commands_counter = 0
+        users[chat_id]['commands_counter'] = 0
         start_circle(message)
 
 
@@ -394,8 +402,8 @@ def congratulate(message):
     bot.send_message(message.chat.id,
                      'Игра окончена!')
     echo(message, 'Игра окончена!')
-    for i in commands_score:
-        if commands_score[i] == max(commands_score.values()):
+    for i in list(users[chat_id]['command_name'].keys()):
+        if users[chat_id]['command_name'][i] == max(list(users[chat_id]['command_name'].values())):
             bot.send_message(message.chat.id,
                              f'Победила команда {i}', reply_markup=keyboard)
             echo(message, f'Победила команда {i}')
@@ -413,8 +421,9 @@ def congratulate(message):
 #     return self.bot.users[user_id]['words counter']
 
 def count_words():
-    Counters.words_counter += 1
-    return Counters.words_counter
+    chat_id = message.chat.id
+    users[chat_id]['words_counter'] += 1
+    return users[chat_id]['words_counter']
 
 
 def score_counter(self, command_title):
