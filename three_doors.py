@@ -1,7 +1,13 @@
+"""
+Данный скрипт доказывает интересную задачу из теории вероятности. Перед вами три двери, вам известно, что за одной из них
+приз. Вы выбираете одну дверь. Но ведущий открывает вам другую дверь, за которой пусто, и предлагает поменять своё решение
+- из оставшихся двух дверей выбрать другую, чтобы найти приз. Целесообразно ли менять своё решение? Могут ли ваши шансы
+вырасти?
+"""
 import random
 
-counters = {'not_change_counter_true': 0, 'not_change_counter_false': 0,
-            'change_counter_true': 0, 'change_counter_false': 0}
+counters = {'Не поменял и угадал': 0, 'Не поменял и не угадал': 0, #счётчик угадываний, если решение НЕ меняется
+            'Поменял и угадал': 0, 'Поменял и не угадал': 0} #счётчик угадываний, если решение МЕНЯЕТСЯ
 
 def play1():
 
@@ -10,9 +16,9 @@ def play1():
         random.shuffle(doors)
         choice = random.randint(0, 2)
         if doors[choice] == 'True':
-            counters['not_change_counter_true'] += 1
+            counters['Не поменял и угадал'] += 1
         else:
-            counters['not_change_counter_false'] += 1
+            counters['Не поменял и не угадал'] += 1
 
 def play2():
     for i in range (0, 1000000):
@@ -20,23 +26,23 @@ def play2():
         random.shuffle(doors)
         my_choice = random.randint(0, 2)
         if my_choice == 0 and doors[0] == 'True':
-            counters['change_counter_false'] += 1
+            counters['Поменял и не угадал'] += 1
         elif my_choice == 0 and doors[1] == 'True':
-            counters['change_counter_true'] += 1
+            counters['Поменял и угадал'] += 1
         elif my_choice == 0 and doors[2] == 'True':
-            counters['change_counter_true'] += 1
+            counters['Поменял и угадал'] += 1
         elif my_choice == 1 and doors[0] == 'True':
-            counters['change_counter_true'] += 1
+            counters['Поменял и угадал'] += 1
         elif my_choice == 1 and doors[1] == 'True':
-            counters['change_counter_false'] += 1
+            counters['Поменял и не угадал'] += 1
         elif my_choice == 1 and doors[2] == 'True':
-            counters['change_counter_true'] += 1
+            counters['Поменял и угадал'] += 1
         elif my_choice == 2 and doors[0] == 'True':
-            counters['change_counter_true'] += 1
+            counters['Поменял и угадал'] += 1
         elif my_choice == 2 and doors[1] == 'True':
-            counters['change_counter_true'] += 1
+            counters['Поменял и угадал'] += 1
         elif my_choice == 2 and doors[2] == 'True':
-            counters['change_counter_false'] += 1
+            counters['Поменял и не угадал'] += 1
 
 if __name__ == '__main__':
     play1()
