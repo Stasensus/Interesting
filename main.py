@@ -66,7 +66,10 @@ def show_rules(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     button_back = types.KeyboardButton('Начать игру')
     markup.row(button_back)
-    bot.send_message(message.chat.id, 'Правила игры таковы: ... ', reply_markup=markup)
+    bot.send_message(message.chat.id, 'Правила игры просты. Разбейтесь на команды по два человека и объясняйте слова '
+                                      'друг другу. Нельзя использовать однокоренные слова, перевод слов на другие языки, '
+                                      'указывать на предметы в комнате. По очереди меняйтесь ролями внутри команды.',
+                     reply_markup=markup)
     bot.register_next_step_handler(message, get_command_amount)
 
 
@@ -133,7 +136,7 @@ def command_name(message):
 
 def victory_score(message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    button25 = types.KeyboardButton('10')
+    button25 = types.KeyboardButton('25')
     button50 = types.KeyboardButton('50')
     button100 = types.KeyboardButton('100')
     keyboard.row(button25, button50, button100)
@@ -143,7 +146,7 @@ def victory_score(message):
 
 def set_victory_score(message):
     chat_id = message.chat.id
-    if message.text in ['10', '50', '100']:
+    if message.text in ['25', '50', '100']:
         users[chat_id]['score'] = int(message.text)
         penalty(message)
     else:
@@ -172,7 +175,7 @@ def set_penalty(message):
 
 def explain_time(message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    button_60 = types.KeyboardButton('15')
+    button_60 = types.KeyboardButton('60')
     button_90 = types.KeyboardButton('90')
     button_120 = types.KeyboardButton('120')
     keyboard.row(button_60, button_90, button_120)
@@ -182,7 +185,7 @@ def explain_time(message):
 
 def set_explain_time(message):
     chat_id = message.chat.id
-    if message.text.lower() == '15':
+    if message.text.lower() == '60':
         users[chat_id]['explain_time'] = int(message.text)
         choose_dict(message)
     elif message.text.lower() == '90':
@@ -245,6 +248,7 @@ def create_game_code(message):
     code = random.randint(10000000, 999999999999)
     players[code] = [message.chat.id]
     bot.send_message(message.chat.id, f'Ваш код: {code}')
+    bot.send_message(message.chat.id, f'Отправьте его вашим друзьям, и они смогут присоединиться к игре как зрители.')
     create_counters(message)
 
 def create_counters(message):
@@ -282,14 +286,6 @@ def start_explanation(message):
     users[chat_id]['temporary_score_counter'] = 0
     Object_time.time_start(message)
     users[chat_id]['temp_words_list'] = []
-
-    # keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    # button_next = types.KeyboardButton('Следующее слово')
-    # button_skip = types.KeyboardButton('Пропустить слово')
-    # keyboard.row(button_next, button_skip)
-    # bot.send_message(message.chat.id,
-    #                  users[chat_id]['dictionary'][users[chat_id]['words_counter']], reply_markup=keyboard)
-    # echo(message, {users[chat_id]['dictionary'][users[chat_id]['words_counter']]})
     demonstrate_word(message)
 
 
@@ -358,9 +354,13 @@ def finish_explanation_3(message):
     active_command = list(users[chat_id]['command_name'].keys())[users[chat_id]['commands_counter']]
     users[chat_id]['command_name'][active_command] += users[chat_id]['temporary_score_counter']
     n = users[chat_id]['temporary_score_counter']
+    if n == 0 or n > 4:
+        m = 'очков'
+    elif 0 < n < 5:
+        m = 'очка'
     bot.send_message(message.chat.id,
-                     f'Ваша команда набрала {n} очков')
-    echo(message, f'Ваша команда набрала {n} очков')
+                     f'Ваша команда набрала {n} {m}')
+    echo(message, f'Ваша команда набрала {n} {m}')
     finish_explanation_4(message)
 
 def finish_explanation_4(message):
@@ -382,9 +382,13 @@ def finish_explanation_4(message):
 def finish_circle(message):
     chat_id = message.chat.id
     for i, j in list(users[chat_id]['command_name'].items()):
+        if j == 0 or j > 4:
+            m = 'очков'
+        elif 0 < j < 5:
+            m = 'очка'
         bot.send_message(message.chat.id,
-                         f'Команда {i} набрала {j} очков')
-        echo(message, f'Команда {i} набрала {j} очков')
+                         f'Команда {i} набрала {j} {m}')
+        echo(message, f'Команда {i} набрала {j} {m}')
     for i in list(users[chat_id]['command_name'].values()):
         if i >= users[chat_id]['score']:
             congratulate(message)
@@ -402,55 +406,12 @@ def congratulate(message):
     bot.send_message(message.chat.id,
                      'Игра окончена!')
     echo(message, 'Игра окончена!')
+    bot.register_next_step_handler(message, start)
     for i in list(users[chat_id]['command_name'].keys()):
         if users[chat_id]['command_name'][i] == max(list(users[chat_id]['command_name'].values())):
             bot.send_message(message.chat.id,
                              f'Победила команда {i}', reply_markup=keyboard)
             echo(message, f'Победила команда {i}')
-
-
-"""
-Функция ниже нигде не используется
-"""
-
-
-# def zero_counter(self, event):
-#     user_id = event.user_id
-#     if not self.bot.users[user_id].get('words counter'):
-#         self.bot.users[user_id]['words counter'] = 0
-#     return self.bot.users[user_id]['words counter']
-
-def count_words():
-    chat_id = message.chat.id
-    users[chat_id]['words_counter'] += 1
-    return users[chat_id]['words_counter']
-
-
-def score_counter(self, command_title):
-    self.bot.commands_score[command_title] += 1
-
-
-def commands_count(self, event):
-    user_id = event.user_id
-    self.commands_counter += 1
-    if self.commands_counter >= self.bot.users.get(user_id)['command_amount']:
-        self.commands_counter = 0
-
-
-def set_temp_counter_2zero(self):
-    self.__temp_counter = 0
-
-
-def temp_score_counter(self):
-    self.__temp_counter += 1
-
-
-# def finish_explaination(self, event):
-#     user_id = event.user_id
-#     self.bot._send_msg(user_id, "Время истекло!")
-#     print(self.bot.commands_score)
-#     self.commands_count(event)
-#     self.game_starter(event)
 
 
 if __name__ == '__main__':

@@ -8,6 +8,8 @@ def play():
     doors = ['True', 'False', 'False']
     doors2 = [1, 2, 3]
     random.shuffle(doors)
+    dilemma = 'change'
+    print(dilemma)
     print(counters)
     # if doors[0] == 'True':
     #     x = random.randint(1, 2)
@@ -28,30 +30,27 @@ def play():
     #     doors2[x] = 'False'
     #     doors2[y] = '?'
     #print(doors2)
-    my_choice = int(input('Какую дверь ты выбираешь?'))
-    my_choice -= 1
+    my_choice = random.randint(0, 2)
     if doors[my_choice] == 'True':
-        print('Ты угадал!')
         counters['first_time_counter'] += 1
-        print(counters)
+
         play()
 
     else:
-        if my_choice == 0 and doors[2] == 'True':
-            doors2 = ['???', 'False', '???']
-        elif my_choice == 0 and doors[1] == 'True':
-            doors2 = ['???', '???', 'False']
-        elif my_choice == 1 and doors[0] == 'True':
-            doors2 = ['???', '???', 'False']
-        elif my_choice == 1 and doors[2] == 'True':
-            doors2 = ['False', '???', '???']
-        elif my_choice == 2 and doors[0] == 'True':
-            doors2 = ['???', 'False', '???']
-        elif my_choice == 2 and doors[1] == 'True':
-            doors2 = ['False', '???', '???']
-        print(doors2)
-        dilemma = input('Ты не угадал. Будешь ли ты менять своё решение? Y/N')
-        if dilemma == 'Y':
+        if dilemma == 'change':
+            if my_choice == 0 and doors[2] == 'True':
+                my_choice = 2
+            elif my_choice == 0 and doors[1] == 'True':
+                my_choice = 1
+            elif my_choice == 1 and doors[0] == 'True':
+                doors2 = ['???', '???', 'False']
+            elif my_choice == 1 and doors[2] == 'True':
+                doors2 = ['False', '???', '???']
+            elif my_choice == 2 and doors[0] == 'True':
+                doors2 = ['???', 'False', '???']
+            elif my_choice == 2 and doors[1] == 'True':
+                doors2 = ['False', '???', '???']
+
             my_choice = int(input('Какую дверь ты выбираешь?'))
             my_choice -= 1
             if doors[my_choice] == 'True':
