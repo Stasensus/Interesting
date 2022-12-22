@@ -9,7 +9,7 @@ import random
 counters = {'Не поменял и угадал': 0, 'Не поменял и не угадал': 0, #счётчик угадываний, если решение НЕ меняется
             'Поменял и угадал': 0, 'Поменял и не угадал': 0} #счётчик угадываний, если решение МЕНЯЕТСЯ
 
-def play1():
+def play_not_change_choice():
 
     for i in range (0, 1000000):
         doors = ['True', 'False', 'False']
@@ -20,7 +20,7 @@ def play1():
         else:
             counters['Не поменял и не угадал'] += 1
 
-def play2():
+def play_change_choice():
     for i in range (0, 1000000):
         doors = ['True', 'False', 'False']
         random.shuffle(doors)
@@ -45,6 +45,6 @@ def play2():
             counters['Поменял и не угадал'] += 1
 
 if __name__ == '__main__':
-    play1()
-    play2()
+    play_not_change_choice()
+    play_change_choice()
     print(counters)
