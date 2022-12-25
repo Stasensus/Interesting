@@ -48,3 +48,4 @@ if __name__ == '__main__':
     play_not_change_choice()
     play_change_choice()
     print(counters)
+
