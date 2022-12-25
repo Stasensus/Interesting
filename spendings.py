@@ -52,8 +52,8 @@ def iterate():
             list3[min_number] = min
             #print(list3)
         iterate()
-
-iterate()
+if __name__ == '__main__':
+    iterate()
 
 
 
