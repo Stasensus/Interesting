@@ -1,12 +1,15 @@
-list = [100, 50, 200, 500, 300, 400, 0, 650, 300, 500]
-list2 = ['Маша', 'Глаша', 'Петя', 'Серёжа', 'Ваня', 'Стасик', 'Мишка', 'Гришка', 'Автандил Петрович', 'Пётр Абдурахманович']
+list = [500, 800, 2000]
+list2 = ['Ann', 'Kate', 'Bob']
+
+#list = [100, 50, 200, 500, 300, 400, 0, 650, 300, 500]
+#list2 = ['Маша', 'Глаша', 'Петя', 'Серёжа', 'Ваня', 'Стасик', 'Мишка', 'Гришка', 'Автандил Петрович', 'Пётр Абдурахманович']
 slovnik = {'Маша': 100, 'Глаша': 50, 'Петя': 200, 'Серёжа': 500, 'Ваня': 300, 'Стасик': 400, 'Мишка': 0, 'Гришка': 650, 'Автандил Петрович': 300, 'Пётр Абдурахманович': 500}
 list3 = []
 result = {}
 mean = sum(list)/len(list)
 #print(list)
 #print(list2)
-print(slovnik)
+#print(slovnik)
 print(f'В среднем было потрачено {mean} рублей')
 for i in range(len(list)):
     x = mean-list[i]
@@ -44,13 +47,13 @@ def iterate():
             max = 0
             list3[max_number] = max
             list3[min_number] = min
-            #print(list3)
+            print(list3)
         else:
             max = max + min
             min = 0
             list3[max_number] = max
             list3[min_number] = min
-            #print(list3)
+            print(list3)
         iterate()
 if __name__ == '__main__':
     iterate()
